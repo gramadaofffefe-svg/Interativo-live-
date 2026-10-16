@@ -1,0 +1,675 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAÓTICO LIVE — Transmissão Real TikTok</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#090d16',
+                        cardBg: '#121826',
+                        accentPink: '#ff0055',
+                        accentCyan: '#00f0ff',
+                        accentPurple: '#8b5cf6'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #090d16; color: #f3f4f6; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #090d16; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 3px; }
+        .neon-glow { text-shadow: 0 0 10px rgba(0, 240, 255, 0.5), 0 0 20px rgba(0, 240, 255, 0.3); }
+        .neon-box { box-shadow: 0 0 20px rgba(0, 240, 255, 0.15); border: 1px solid rgba(0, 240, 255, 0.3); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row antialiased selection:bg-accentCyan selection:text-black">
+
+    <aside id="sidebar" class="w-full md:w-64 bg-cardBg border-b md:border-b-0 md:border-r border-gray-800 flex flex-col z-40 transition-all duration-300">
+        <div class="p-4 md:p-6 flex items-center justify-between border-b border-gray-800">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-accentPink to-accentCyan flex items-center justify-center text-black font-extrabold text-xl shadow-lg">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg tracking-wider text-white">CAÓTICO<span class="text-accentCyan">LIVE</span></h1>
+                    <span class="text-xs text-gray-400 font-medium">TikTok Conector Real v3.0</span>
+                </div>
+            </div>
+            <button id="mobileMenuBtn" class="md:hidden text-gray-400 hover:text-white p-2">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+        </div>
+
+        <nav id="navLinks" class="hidden md:flex flex-col flex-1 p-4 space-y-1 overflow-y-auto">
+            <a href="#dashboard" onclick="switchTab('dashboard')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold transition bg-cyan-500/10 text-accentCyan border border-cyan-500/20" data-tab="dashboard">
+                <i class="fa-solid fa-chart-pie w-5"></i><span>Início / Painel</span>
+            </a>
+            <a href="#catalog" onclick="switchTab('catalog')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/50 transition" data-tab="catalog">
+                <i class="fa-solid fa-gamepad w-5"></i><span>Catálogo de Jogos</span>
+            </a>
+            <a href="#connect" onclick="switchTab('connect')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/50 transition" data-tab="connect">
+                <i class="fa-solid fa-tower-broadcast w-5"></i><span>Conectar TikTok LIVE</span>
+            </a>
+            <a href="#streaming" onclick="switchTab('streaming')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/50 transition" data-tab="streaming">
+                <i class="fa-solid fa-video w-5"></i><span>Como Exibir na LIVE</span>
+            </a>
+            <a href="#rules" onclick="switchTab('rules')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/50 transition" data-tab="rules">
+                <i class="fa-solid fa-sliders w-5"></i><span>Configurar Presentes</span>
+            </a>
+            <a href="#events" onclick="switchTab('events')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/50 transition" data-tab="events">
+                <i class="fa-solid fa-satellite-dish w-5"></i><span>Log de Eventos Reais</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-gray-800 hidden md:block">
+            <div class="bg-gray-900/80 p-3 rounded-xl border border-gray-800">
+                <div class="flex items-center justify-between text-xs mb-1">
+                    <span class="text-gray-400">Status da LIVE</span>
+                    <span id="sidebarStatusBadge" class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">DESCONECTADO</span>
+                </div>
+                <div class="text-xs text-gray-300 font-mono truncate" id="sidebarAccount">@não_conectado</div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        <header class="h-16 bg-cardBg border-b border-gray-800 flex items-center justify-between px-4 md:px-8 z-30">
+            <div class="flex items-center space-x-4">
+                <h2 id="currentViewTitle" class="text-lg font-bold text-white">Painel Principal</h2>
+            </div>
+            <div class="flex items-center space-x-3">
+                <div id="connectionStatusIndicator" class="flex items-center space-x-2 bg-gray-900 px-3 py-1.5 rounded-full border border-gray-800">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" id="statusDot"></span>
+                    <span class="text-xs font-medium text-gray-300" id="statusText">Aguardando Conexão Real</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-4 md:p-8 flex-1">
+
+            <section id="view-dashboard" class="space-y-6">
+                <div class="relative rounded-2xl bg-gradient-to-r from-cardBg via-gray-900 to-cardBg border border-gray-800 p-6 md:p-8 overflow-hidden neon-box">
+                    <div class="relative z-10 max-w-2xl">
+                        <span class="px-3 py-1 rounded-full bg-accentPink/20 text-accentPink text-xs font-bold uppercase tracking-wider">Modo Transmissão Ativa</span>
+                        <h2 class="text-2xl md:text-3xl font-extrabold text-white mt-2">Coloque o jogo na sua LIVE do TikTok</h2>
+                        <p class="text-gray-400 text-sm mt-2">Para o jogo aparecer na live e reagir a presentes reais, você precisa selecionar o jogo e transmitir a tela do dispositivo para o TikTok.</p>
+                        <div class="flex flex-wrap gap-3 mt-6">
+                            <button onclick="switchTab('catalog')" class="px-5 py-2.5 bg-accentCyan text-black font-bold text-sm rounded-xl hover:opacity-90 transition flex items-center space-x-2">
+                                <i class="fa-solid fa-gamepad"></i><span>1. Escolher Jogo</span>
+                            </button>
+                            <button onclick="switchTab('connect')" class="px-5 py-2.5 bg-accentPink text-white font-bold text-sm rounded-xl hover:opacity-90 transition flex items-center space-x-2">
+                                <i class="fa-solid fa-plug"></i><span>2. Conectar Conta TikTok</span>
+                            </button>
+                            <button onclick="switchTab('streaming')" class="px-5 py-2.5 bg-gray-800 text-white font-semibold text-sm rounded-xl hover:bg-gray-700 transition border border-gray-700">
+                                3. Como transmitir a tela
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-cardBg border border-gray-800 p-5 rounded-2xl">
+                        <div class="flex items-center justify-between text-gray-400 text-sm">
+                            <span>Status da Live</span>
+                            <i class="fa-solid fa-tower-broadcast text-accentCyan"></i>
+                        </div>
+                        <div class="text-lg font-bold text-white mt-2 truncate" id="dashConnectionState">Desconectado</div>
+                    </div>
+                    <div class="bg-cardBg border border-gray-800 p-5 rounded-2xl">
+                        <div class="flex items-center justify-between text-gray-400 text-sm">
+                            <span>Jogo Selecionado</span>
+                            <i class="fa-solid fa-gamepad text-accentPink"></i>
+                        </div>
+                        <div class="text-lg font-bold text-white mt-2 truncate" id="dashSelectedGame">Nenhum Selecionado</div>
+                    </div>
+                    <div class="bg-cardBg border border-gray-800 p-5 rounded-2xl">
+                        <div class="flex items-center justify-between text-gray-400 text-sm">
+                            <span>Presentes Reais</span>
+                            <i class="fa-solid fa-gift text-amber-400"></i>
+                        </div>
+                        <div class="text-lg font-bold text-white mt-2" id="dashEventCount">0</div>
+                    </div>
+                    <div class="bg-cardBg border border-gray-800 p-5 rounded-2xl">
+                        <div class="flex items-center justify-between text-gray-400 text-sm">
+                            <span>Tempo de Live</span>
+                            <i class="fa-solid fa-clock text-purple-400"></i>
+                        </div>
+                        <div class="text-lg font-bold text-white font-mono mt-2" id="dashSessionTime">00:00:00</div>
+                    </div>
+                </div>
+
+                <!-- Active Game Launcher Box -->
+                <div id="activeGameBanner" class="bg-cardBg border border-cyan-500/40 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-accentCyan uppercase">Pronto para a Transmissão</span>
+                        <h3 class="text-xl font-bold text-white" id="activeGameBannerTitle">Selecione um jogo no Catálogo</h3>
+                        <p class="text-sm text-gray-400 mt-1">Abra a tela do jogo antes de iniciar a captura de tela no TikTok.</p>
+                    </div>
+                    <button id="openActiveGameBtn" onclick="launchSelectedGame()" disabled class="w-full md:w-auto px-6 py-3 bg-gray-700 text-gray-400 font-bold rounded-xl transition flex items-center justify-center space-x-2 cursor-not-allowed">
+                        <i class="fa-solid fa-desktop"></i><span>Abrir Tela do Jogo</span>
+                    </button>
+                </div>
+            </section>
+
+            <section id="view-catalog" class="space-y-6 hidden">
+                <div>
+                    <h3 class="text-2xl font-extrabold text-white">Catálogo de Jogos</h3>
+                    <p class="text-gray-400 text-sm">Clique em "Selecionar e Jogar na Live" para ativar o jogo na sua transmissão.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Game 1 -->
+                    <div class="bg-cardBg border border-gray-800 rounded-2xl overflow-hidden flex flex-col hover:border-cyan-500/50 transition">
+                        <div class="h-44 bg-gradient-to-br from-indigo-900 to-gray-900 p-4 relative flex items-center justify-center">
+                            <i class="fa-solid fa-shield-halved text-6xl text-accentCyan"></i>
+                        </div>
+                        <div class="p-5 flex flex-col flex-1 justify-between space-y-4">
+                            <div>
+                                <h4 class="font-bold text-white text-lg">Sobrevivência Caótica</h4>
+                                <p class="text-xs text-gray-400 mt-1">Mova o personagem na tela. Rosas e Leões reais recebidos na LIVE geram inimigos e chefes na hora!</p>
+                            </div>
+                            <button onclick="selectGame('Sobrevivência Caótica', 'survival')" class="w-full py-3 bg-accentCyan text-black font-bold text-sm rounded-xl hover:opacity-90 transition">
+                                Selecionar e Jogar na Live
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Game 2 -->
+                    <div class="bg-cardBg border border-gray-800 rounded-2xl overflow-hidden flex flex-col hover:border-pink-500/50 transition">
+                        <div class="h-44 bg-gradient-to-br from-purple-900 to-gray-900 p-4 relative flex items-center justify-center">
+                            <i class="fa-solid fa-flag-checkered text-6xl text-accentPink"></i>
+                        </div>
+                        <div class="p-5 flex flex-col flex-1 justify-between space-y-4">
+                            <div>
+                                <h4 class="font-bold text-white text-lg">Corrida Interativa</h4>
+                                <p class="text-xs text-gray-400 mt-1">Carros avançam de acordo com os curtidores e presentes dos espectadores na transmissão.</p>
+                            </div>
+                            <button onclick="selectGame('Corrida Interativa', 'race')" class="w-full py-3 bg-accentPink text-white font-bold text-sm rounded-xl hover:opacity-90 transition">
+                                Selecionar e Jogar na Live
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-connect" class="space-y-6 hidden">
+                <div class="bg-cardBg border border-gray-800 rounded-2xl p-6 md:p-8 max-w-2xl mx-auto space-y-6">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gradient-to-tr from-accentPink to-accentCyan rounded-2xl mx-auto flex items-center justify-center text-black text-2xl font-bold mb-4">
+                            <i class="fa-solid fa-tower-broadcast"></i>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-white">Conectar ao TikTok LIVE Real</h3>
+                        <p class="text-gray-400 text-sm mt-1">Insira seu usuário do TikTok. **Nota:** Você deve estar **AO VIVO** no TikTok para a conexão responder!</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Seu Nome de Usuário TikTok</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-500 font-bold">@</span>
+                                <input type="text" id="tiktokUsernameInput" placeholder="seu_usuario_exato" class="w-full bg-gray-900 border border-gray-800 rounded-xl py-3 pl-8 pr-4 text-white placeholder-gray-600 focus:outline-none focus:border-accentCyan transition">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Endereço do Conector WebSocket (Local ou Remoto)</label>
+                            <input type="text" id="wsServerInput" value="ws://localhost:8081" class="w-full bg-gray-900 border border-gray-800 rounded-xl py-2.5 px-4 text-white font-mono text-xs focus:outline-none focus:border-accentCyan transition">
+                            <p class="text-xs text-gray-500 mt-1">Se estiver rodando o `tiktok-live-connector` via Node.js na sua máquina, mantenha `ws://localhost:8081`.</p>
+                        </div>
+
+                        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-400 font-semibold uppercase">Estado da Conexão em Tempo Real</span>
+                                <span id="connectionDetailedBadge" class="px-2.5 py-1 rounded text-xs font-bold bg-red-500/20 text-red-400">Desconectado</span>
+                            </div>
+                            <div class="text-xs text-gray-300 font-mono" id="connectionDetailMsg">Inicie sua LIVE no TikTok antes de conectar.</div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 pt-2">
+                            <button onclick="connectTikTokLiveReal()" class="px-4 py-3 bg-accentCyan text-black font-bold text-xs rounded-xl hover:opacity-90 transition flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-plug"></i><span>Conectar Conector Real</span>
+                            </button>
+                            <button onclick="disconnectTikTokLiveReal()" class="px-4 py-3 bg-gray-800 text-gray-300 font-bold text-xs rounded-xl hover:bg-gray-700 transition flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-power-off"></i><span>Desconectar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-streaming" class="space-y-6 hidden">
+                <div>
+                    <h3 class="text-2xl font-extrabold text-white">Como Fazer o Jogo Aparecer na LIVE?</h3>
+                    <p class="text-gray-400 text-sm">O TikTok não puxa links diretamente. Siga um dos passos abaixo para exibir o jogo na sua transmissão:</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-cardBg border border-accentCyan/40 rounded-2xl p-6 space-y-4">
+                        <div class="w-10 h-10 rounded-xl bg-accentCyan/20 text-accentCyan flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                        </div>
+                        <h4 class="text-lg font-bold text-white">Opção 1: Pelo Celular (Android / iPhone)</h4>
+                        <ol class="list-decimal list-inside text-sm text-gray-300 space-y-2">
+                            <li>No aplicativo do <strong>TikTok</strong>, toque no botão <strong>+</strong> e escolha <strong>AO VIVO</strong>.</li>
+                            <li>Selecione a opção <strong>Transmissão de Tela de Jogos (Mobile Gaming)</strong>.</li>
+                            <li>Inicie a transmissão no TikTok.</li>
+                            <li>Abra o navegador Chrome no seu celular com este site, selecione o jogo e clique em <strong>"Abrir Tela do Jogo"</strong>.</li>
+                            <li>O jogo estará aparecendo exatamente na sua Live do TikTok!</li>
+                        </ol>
+                    </div>
+
+                    <div class="bg-cardBg border border-accentPink/40 rounded-2xl p-6 space-y-4">
+                        <div class="w-10 h-10 rounded-xl bg-accentPink/20 text-accentPink flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-desktop"></i>
+                        </div>
+                        <h4 class="text-lg font-bold text-white">Opção 2: Pelo Computador (OBS Studio / TikTok LIVE Studio)</h4>
+                        <ol class="list-decimal list-inside text-sm text-gray-300 space-y-2">
+                            <li>Abra o <strong>OBS Studio</strong> ou o <strong>TikTok LIVE Studio</strong>.</li>
+                            <li>Adicione uma nova fonte do tipo <strong>Captura de Janela (Window Capture)</strong> ou <strong>Fonte de Navegador (Browser)</strong>.</li>
+                            <li>Selecione a janela onde o jogo está aberto.</li>
+                            <li>Qualquer presente recebido na live moverá/gerará monstros no jogo instantaneamente no OBS e na transmissão!</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-rules" class="space-y-6 hidden">
+                <h3 class="text-xl font-bold text-white">Mapeamento de Presentes</h3>
+                <div class="bg-cardBg border border-gray-800 rounded-2xl p-4 text-sm text-gray-300 space-y-3">
+                    <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+                        <span class="font-bold text-accentPink">🌹 Presente: Rosa</span>
+                        <span>Gera 1 Inimigo no Jogo Ativo</span>
+                    </div>
+                    <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+                        <span class="font-bold text-accentPurple">🦁 Presente: Leão / Presente Grande</span>
+                        <span>Invoca Chefe Gigante na Arena</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-accentCyan">❤️ Curtidas na Live</span>
+                        <span>Aumentam a velocidade/pontuação do jogador</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-events" class="space-y-6 hidden">
+                <h3 class="text-xl font-bold text-white">Log de Eventos Recebidos da Live</h3>
+                <div class="bg-cardBg border border-gray-800 rounded-2xl p-4 font-mono text-xs h-80 overflow-y-auto space-y-2" id="eventLogsConsole">
+                    <div class="text-gray-500">[SISTEMA] Aguardando conexão real WebSocket...</div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <div id="gameModal" class="fixed inset-0 bg-black z-50 hidden flex flex-col">
+        <div class="h-12 bg-cardBg border-b border-gray-800 flex items-center justify-between px-4">
+            <div class="flex items-center space-x-2">
+                <span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
+                <h3 id="activeGameTitle" class="font-bold text-white text-sm">Jogo Ativo na Transmissão</h3>
+            </div>
+            <button onclick="closeGameModal()" class="px-3 py-1 bg-red-500/20 text-red-400 border border-red-500/40 rounded-lg text-xs font-bold hover:bg-red-500/30">
+                Fechar Jogo
+            </button>
+        </div>
+
+        <div class="flex-1 relative flex items-center justify-center overflow-hidden bg-gray-950">
+            <canvas id="gameCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+            
+            <div class="absolute top-4 left-4 bg-black/80 backdrop-blur border border-gray-800 rounded-xl p-3 text-white text-xs space-y-1 pointer-events-none">
+                <div>Pontuação: <span id="hudScore" class="font-bold text-accentCyan">0</span></div>
+                <div>Vidas: <span id="hudHealth" class="font-bold text-accentPink">100</span></div>
+                <div>Inimigos em Tela: <span id="hudEnemies" class="font-bold text-amber-400">0</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            currentTab: 'dashboard',
+            selectedGame: null,
+            selectedGameKey: null,
+            isConnected: false,
+            username: '',
+            eventCount: 0,
+            sessionSeconds: 0,
+            ws: null
+        };
+
+        window.addEventListener('load', () => {
+            initTimer();
+            setupMobileMenu();
+        });
+
+        function setupMobileMenu() {
+            document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+                document.getElementById('navLinks').classList.toggle('hidden');
+            });
+        }
+
+        function switchTab(tabId) {
+            state.currentTab = tabId;
+            document.querySelectorAll('section[id^="view-"]').forEach(sec => sec.classList.add('hidden'));
+            const target = document.getElementById(`view-${tabId}`);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('bg-cyan-500/10', 'text-accentCyan', 'border', 'border-cyan-500/20');
+                item.classList.add('text-gray-400');
+                if(item.getAttribute('data-tab') === tabId) {
+                    item.classList.add('bg-cyan-500/10', 'text-accentCyan', 'border', 'border-cyan-500/20');
+                    item.classList.remove('text-gray-400');
+                }
+            });
+
+            if(window.innerWidth < 768) {
+                document.getElementById('navLinks').classList.add('hidden');
+            }
+        }
+
+        function initTimer() {
+            setInterval(() => {
+                state.sessionSeconds++;
+                const hrs = String(Math.floor(state.sessionSeconds / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((state.sessionSeconds % 3600) / 60)).padStart(2, '0');
+                const secs = String(state.sessionSeconds % 60).padStart(2, '0');
+                document.getElementById('dashSessionTime').innerText = `${hrs}:${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function selectGame(name, key) {
+            state.selectedGame = name;
+            state.selectedGameKey = key;
+
+            document.getElementById('dashSelectedGame').innerText = name;
+            document.getElementById('activeGameBannerTitle').innerText = name;
+            
+            const btn = document.getElementById('openActiveGameBtn');
+            btn.disabled = false;
+            btn.className = "w-full md:w-auto px-6 py-3 bg-gradient-to-r from-accentPink to-accentCyan text-black font-extrabold rounded-xl shadow-lg hover:opacity-90 transition flex items-center justify-center space-x-2";
+
+            showToast(`Jogo "${name}" selecionado! Clique em "Abrir Tela do Jogo" para transmitir.`, "success");
+            switchTab('dashboard');
+        }
+
+        function launchSelectedGame() {
+            if(!state.selectedGameKey) {
+                showToast("Por favor, selecione um jogo primeiro.", "error");
+                return;
+            }
+            launchGameEngine();
+        }
+
+        // Conexão WebSocket Real com o TikTok Connector
+        function connectTikTokLiveReal() {
+            const user = document.getElementById('tiktokUsernameInput').value.trim();
+            const wsUrl = document.getElementById('wsServerInput').value.trim();
+
+            if(!user) {
+                showToast("Insira seu nome de usuário do TikTok.", "error");
+                return;
+            }
+
+            state.username = user.startsWith('@') ? user : '@' + user;
+            appendLog(`[WEBSOCKET] Tentando conectar ao servidor ${wsUrl}...`);
+
+            try {
+                state.ws = new WebSocket(wsUrl);
+
+                state.ws.onopen = () => {
+                    appendLog(`[WEBSOCKET] Conectado ao servidor de ponte. Solicitando escuta para ${state.username}...`);
+                    state.ws.send(JSON.stringify({ type: 'setUniqueId', uniqueId: state.username.replace('@', '') }));
+                    
+                    setConnectionStatus(true, "Conectado ao TikTok");
+                    showToast("Conectado com sucesso ao conector da Live!", "success");
+                };
+
+                state.ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        handleRealTikTokEvent(data);
+                    } catch(e) {
+                        console.error(e);
+                    }
+                };
+
+                state.ws.onerror = (err) => {
+                    appendLog(`[ERRO WEBSOCKET] Não foi possível conectar ao servidor local/remoto.`);
+                    setConnectionStatus(false, "Erro na Conexão");
+                    showToast("Erro ao conectar ao conector TikTok.", "error");
+                };
+
+                state.ws.onclose = () => {
+                    setConnectionStatus(false, "Desconectado");
+                    appendLog(`[WEBSOCKET] Conexão encerrada.`);
+                };
+
+            } catch (err) {
+                showToast("Endereço WebSocket inválido.", "error");
+            }
+        }
+
+        function disconnectTikTokLiveReal() {
+            if(state.ws) {
+                state.ws.close();
+            }
+            setConnectionStatus(false, "Desconectado");
+        }
+
+        function setConnectionStatus(connected, msg) {
+            state.isConnected = connected;
+            document.getElementById('dashConnectionState').innerText = msg;
+            document.getElementById('statusText').innerText = msg;
+            document.getElementById('connectionDetailedBadge').innerText = msg;
+            
+            const badge = document.getElementById('sidebarStatusBadge');
+            const dot = document.getElementById('statusDot');
+
+            if(connected) {
+                badge.className = "px-2 py-0.5 rounded bg-green-500/20 text-green-400 font-bold";
+                badge.innerText = "AO VIVO";
+                dot.className = "w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse";
+            } else {
+                badge.className = "px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-bold";
+                badge.innerText = "DESCONECTADO";
+                dot.className = "w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse";
+            }
+        }
+
+        function handleRealTikTokEvent(data) {
+            state.eventCount++;
+            document.getElementById('dashEventCount').innerText = state.eventCount;
+
+            if(data.event === 'gift') {
+                appendLog(`[PRESENTE REAL] ${data.uniqueId} enviou ${data.giftName}!`);
+                if(data.giftName.toLowerCase().includes('rosa') || data.giftName.toLowerCase().includes('rose')) {
+                    spawnEnemy();
+                } else {
+                    spawnBoss();
+                }
+            } else if(data.event === 'like') {
+                appendLog(`[CURTIDA REAL] ${data.uniqueId} curtiu a Live!`);
+                gameScore += 5;
+            }
+        }
+
+        function appendLog(msg) {
+            const consoleBox = document.getElementById('eventLogsConsole');
+            if(consoleBox) {
+                const time = new Date().toTimeString().split(' ')[0];
+                const div = document.createElement('div');
+                div.className = "text-accentCyan";
+                div.innerText = `[${time}] ${msg}`;
+                consoleBox.appendChild(div);
+                consoleBox.scrollTop = consoleBox.scrollHeight;
+            }
+        }
+
+        function showToast(message, type='info') {
+            const existing = document.getElementById('toastNotification');
+            if(existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'toastNotification';
+            toast.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-2xl text-xs font-bold border flex items-center space-x-3 transition transform ${
+                type === 'success' ? 'bg-green-950 border-green-500/50 text-green-300' : 
+                type === 'error' ? 'bg-red-950 border-red-500/50 text-red-300' : 
+                'bg-gray-900 border-cyan-500/50 text-accentCyan'
+            }`;
+            toast.innerHTML = `<span>${message}</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+
+        // --- MOTOR GRÁFICO DO JOGO (RENDERIZADO NA TELA) ---
+        let activeGameRunning = false;
+        let gameCanvas, ctx;
+        let player = { x: 0, y: 0, radius: 20, speed: 4 };
+        let enemies = [];
+        let gameScore = 0;
+        let playerHealth = 100;
+        let gameAnimationId = null;
+        let touchPos = { x: 0, y: 0, active: false };
+
+        function launchGameEngine() {
+            document.getElementById('gameModal').classList.remove('hidden');
+            activeGameRunning = true;
+            document.getElementById('activeGameTitle').innerText = state.selectedGame;
+
+            gameCanvas = document.getElementById('gameCanvas');
+            ctx = gameCanvas.getContext('2d');
+            resizeCanvas();
+
+            window.addEventListener('resize', resizeCanvas);
+            setupGameControls();
+
+            player.x = gameCanvas.width / 2;
+            player.y = gameCanvas.height / 2;
+            enemies = [];
+            gameScore = 0;
+            playerHealth = 100;
+
+            for(let i=0; i<2; i++) spawnEnemy();
+
+            if(gameAnimationId) cancelAnimationFrame(gameAnimationId);
+            gameLoop();
+        }
+
+        function closeGameModal() {
+            activeGameRunning = false;
+            if(gameAnimationId) cancelAnimationFrame(gameAnimationId);
+            document.getElementById('gameModal').classList.add('hidden');
+        }
+
+        function resizeCanvas() {
+            if(!gameCanvas) return;
+            gameCanvas.width = gameCanvas.parentElement.clientWidth;
+            gameCanvas.height = gameCanvas.parentElement.clientHeight;
+        }
+
+        function setupGameControls() {
+            gameCanvas.onpointerdown = (e) => {
+                touchPos.active = true;
+                const rect = gameCanvas.getBoundingClientRect();
+                touchPos.x = e.clientX - rect.left;
+                touchPos.y = e.clientY - rect.top;
+            };
+            gameCanvas.onpointermove = (e) => {
+                if(!touchPos.active) return;
+                const rect = gameCanvas.getBoundingClientRect();
+                touchPos.x = e.clientX - rect.left;
+                touchPos.y = e.clientY - rect.top;
+            };
+            gameCanvas.onpointerup = () => { touchPos.active = false; };
+        }
+
+        function spawnEnemy() {
+            if(!gameCanvas) return;
+            enemies.push({
+                x: Math.random() * gameCanvas.width,
+                y: -20,
+                radius: 14,
+                speed: 1.5 + Math.random() * 1.5,
+                color: '#ff0055'
+            });
+        }
+
+        function spawnBoss() {
+            if(!gameCanvas) return;
+            enemies.push({
+                x: gameCanvas.width / 2,
+                y: -40,
+                radius: 32,
+                speed: 1,
+                color: '#8b5cf6',
+                isBoss: true
+            });
+        }
+
+        function gameLoop() {
+            if(!activeGameRunning) return;
+
+            ctx.fillStyle = '#05070d';
+            ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+            if(touchPos.active) {
+                const dx = touchPos.x - player.x;
+                const dy = touchPos.y - player.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if(dist > 2) {
+                    player.x += (dx / dist) * player.speed;
+                    player.y += (dy / dist) * player.speed;
+                }
+            }
+
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#00f0ff';
+            ctx.fill();
+
+            for(let i = enemies.length - 1; i >= 0; i--) {
+                let en = enemies[i];
+                const dx = player.x - en.x;
+                const dy = player.y - en.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+
+                if(dist > 1) {
+                    en.x += (dx / dist) * en.speed;
+                    en.y += (dy / dist) * en.speed;
+                }
+
+                if(dist < player.radius + en.radius) {
+                    playerHealth -= en.isBoss ? 2 : 0.5;
+                    if(playerHealth <= 0) {
+                        playerHealth = 100;
+                    }
+                }
+
+                ctx.beginPath();
+                ctx.arc(en.x, en.y, en.radius, 0, Math.PI * 2);
+                ctx.fillStyle = en.color;
+                ctx.fill();
+            }
+
+            gameScore += 0.05;
+            document.getElementById('hudScore').innerText = Math.floor(gameScore);
+            document.getElementById('hudHealth').innerText = Math.max(0, Math.floor(playerHealth));
+            document.getElementById('hudEnemies').innerText = enemies.length;
+
+            gameAnimationId = requestAnimationFrame(gameLoop);
+        }
+    </script>
+</body>
+</html>
+```
