@@ -1,0 +1,173 @@
+
+const express = require('express');
+const http = require('http');
+const WebSocket = require('ws');
+
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+app.get('/', (req, res) => {
+  res.status(200).send('CAÓTICO LIVE Server online');
+});
+
+let TikTokLiveConnection;
+let WebcastEvent;
+let liveConnection = null;
+let currentUsername = '';
+let connecting = false;
+
+function broadcast(data) {
+  const message = JSON.stringify(data);
+
+  for (const client of wss.clients) {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  }
+}
+
+async function startTikTok(username) {
+  if (connecting) {
+    broadcast({ event: 'status', message: 'Conexão em andamento' });
+    return;
+  }
+
+  if (liveConnection && currentUsername === username) {
+    broadcast({ event: 'status', message: 'Já conectado a este usuário' });
+    return;
+  }
+
+  connecting = true;
+
+  try {
+    if (!TikTokLiveConnection) {
+      const module = await import('tiktok-live-connector');
+      TikTokLiveConnection = module.TikTokLiveConnection;
+      WebcastEvent = module.WebcastEvent;
+    }
+
+    if (liveConnection) {
+      try {
+        await liveConnection.disconnect();
+      } catch (_) {}
+      liveConnection = null;
+    }
+
+    currentUsername = username;
+    liveConnection = new TikTokLiveConnection(username);
+
+    liveConnection.on(WebcastEvent.GIFT, (data) => {
+      const giftName =
+        data.giftDetails?.giftName ||
+        data.giftName ||
+        String(data.giftId || 'presente');
+
+      broadcast({
+        event: 'gift',
+        giftName,
+        giftId: data.giftId,
+        repeatCount: data.repeatCount || 1,
+        username: data.user?.uniqueId || data.uniqueId || ''
+      });
+    });
+
+    liveConnection.on(WebcastEvent.LIKE, (data) => {
+      broadcast({
+        event: 'like',
+        likeCount: data.likeCount || 1,
+        totalLikeCount: data.totalLikeCount || 0,
+        username: data.user?.uniqueId || data.uniqueId || ''
+      });
+    });
+
+    liveConnection.on(WebcastEvent.CHAT, (data) => {
+      broadcast({
+        event: 'chat',
+        username: data.user?.uniqueId || data.uniqueId || '',
+        comment: data.comment || ''
+      });
+    });
+
+    liveConnection.on('connected', () => {
+      broadcast({
+        event: 'status',
+        message: 'Conectado ao TikTok LIVE',
+        username
+      });
+    });
+
+    liveConnection.on('disconnected', () => {
+      broadcast({
+        event: 'status',
+        message: 'Conexão TikTok encerrada'
+      });
+    });
+
+    liveConnection.on('error', (error) => {
+      console.error('Erro TikTok:', error.message || error);
+      broadcast({
+        event: 'status',
+        message: 'Erro ao conectar ao TikTok LIVE'
+      });
+    });
+
+    await liveConnection.connect();
+
+    broadcast({
+      event: 'status',
+      message: 'Conexão TikTok iniciada',
+      username
+    });
+  } catch (error) {
+    console.error('Falha na conexão:', error);
+    broadcast({
+      event: 'status',
+      message: 'Não foi possível conectar. Confira o usuário e se a LIVE está ativa.'
+    });
+  } finally {
+    connecting = false;
+  }
+}
+
+wss.on('connection', (ws) => {
+  ws.send(JSON.stringify({
+    event: 'status',
+    message: 'Servidor CAÓTICO LIVE conectado'
+  }));
+
+  ws.on('message', async (raw) => {
+    try {
+      const data = JSON.parse(raw.toString());
+
+      if (data.type === 'setUniqueId') {
+        const username = String(data.uniqueId || '')
+          .trim()
+          .replace(/^@/, '')
+          .replace(/^https?:\/\/(www\.)?tiktok\.com\/@?/i, '')
+          .split(/[/?]/)[0];
+
+        if (!/^[a-zA-Z0-9._]{1,50}$/.test(username)) {
+          ws.send(JSON.stringify({
+            event: 'status',
+            message: 'Nome de usuário TikTok inválido'
+          }));
+          return;
+        }
+
+        await startTikTok(username);
+      }
+    } catch (error) {
+      ws.send(JSON.stringify({
+        event: 'status',
+        message: 'Mensagem inválida recebida'
+      }));
+    }
+  });
+});
+
+const PORT = process.env.PORT || 8081;
+
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`CAÓTICO LIVE Server ouvindo na porta ${PORT}`);
+});
